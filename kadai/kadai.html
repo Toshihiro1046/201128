@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="utf-8" />
+  <title>Chatアプリ</title>
+  <style>
+
+  .login{
+    text-align: center;
+    font-size: 20px;
+    margin-top: 100px;
+  }
+
+ .username{
+   position: center;
+   width: auto;
+   height:20px;
+ }
+
+
+  .LINE{
+    display: none;
+    width: 80%;
+    margin: 30px auto;
+  }
+
+  .chat-name{
+    height:10vh;
+    background:rgba(21, 0, 139, 0.836);
+  }
+
+  .chat-sentence{
+    height: 70vh;
+    background: #8db4e5;
+    overflow: scroll;
+  }
+
+  .input-area{
+    height: 10vh;
+    display: flex;
+  }
+  
+  .name{
+    position: center;
+    margin-top: 100px;
+  }
+
+  .message{
+    width:70%;
+  }
+  
+  .send-button{
+    width: 10%;
+  }
+
+  .message textarea {
+    width: 90%;
+    height: 100%;
+    resize: none;
+  }
+
+  .plane{
+    height: 100%;
+    width: 100%;
+  }
+
+  .send-button button{
+  width: 100%;
+  height: 100%;
+
+  }
+
+  .text-all{
+    display: flex;
+    margin-bottom: 10px;
+  }
+
+  .text-time{
+    font-size: 10px;
+    margin-right:10px;
+  }
+
+  .text-text{
+    font-size: 20px;
+  }
+
+
+ #output1{
+  color: #fff;
+   float: left;
+   padding: 0 14px;
+   line-height:1.3em;
+   word-wrap: break-word;
+   white-space: normal;
+ }
+
+ #output2{
+   float: right;
+   padding: 0 14px;
+   line-height:1.3em;
+   word-wrap: break-word;
+   white-space: normal;
+ }
+
+  </style>
+</head>
+
+<body>
+  <!-- login画面 -->
+
+<div class="login">
+  <h1>チャットしたい相手を入力してください</h1>
+  <div class="name">
+    <!-- 名前 -->
+    名前
+    <input type="text" id="username">
+    <button id="start">start</button>
+  </div>
+</div>
+
+<!-- chat画面 -->
+<div class="LINE">
+  <div class="chat-name">
+    <!-- 保存されたデータが表示される箇所 -->
+    <div id="output1"></div>
+ </div>
+ 
+ <div class="chat-sentence">
+  <!-- 保存されたデータが表示される箇所 -->
+  <div id="output2"></div>
+ </div>
+
+ <div class="input-area">
+
+  <div class="message">
+    <!-- テキストエリア -->
+    テキスト
+    <textarea name="" id="text" cols="30" rows="10"></textarea>
+  </div>
+
+  <div class="send-button">
+    <!-- 送信ボタン -->
+    送信
+    <button id="send">
+      <img class="plane" src="./imgs/1.jpg" alt=""></button>
+  </div>
+ </div>
+
+</div>
+
+ 
+
+  <!--/ ブラウザの画面に見える内容 -->
+
+  <!-- JQuery -->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+  <!--** 以下Firebase **-->
+  <!-- The core Firebase JS SDK is always required and must be listed first -->
+  <!-- ここにfirebaseのscriptを貼り付ける -->
+  <script src="https://www.gstatic.com/firebasejs/7.14.2/firebase.js"></script>
+
+  <script>
+    // Your web app's Firebase configuration
+    var firebaseConfig = {
+      apiKey: "AIzaSyA1S_4PmoLLmeof73UcSHsdWkzFdXkbnMg",
+    authDomain: "dev18-chat01-b5709.firebaseapp.com",
+    databaseURL: "https://dev18-chat01-b5709.firebaseio.com",
+    projectId: "dev18-chat01-b5709",
+    storageBucket: "dev18-chat01-b5709.appspot.com",
+    messagingSenderId: "655359438012",
+    appId: "1:655359438012:web:7839890d4855a8a6ba74b9"
+    };
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+
+    //firebaseのデーターベース（保存させる場所）を使いますよと言うjsのコードを貼り付ける
+    // xxxxxスクリプトを貼り付ける
+
+    $("#start").on("click",
+  function () {
+      $('.login').fadeOut();
+      $('.LINE').fadeIn(1500);
+  });
+
+// chatの相手を取得
+  const newNAME = firebase.database().ref();
+    // startボタンをクリックされたら次の処理をする
+    $("#start").on("click", function () {
+      $("#output1").empty(); //空にする
+
+      newNAME.push({
+        //名前
+        username:$("#username").val(),
+      })
+      
+    });
+
+    newNAME.on("child_added", function (data1) {
+   let k = data1.val();//ここに保存されたデータが全て入ってくる
+      // function (data)のdataにfirebaseのデータが入ってくる
+
+      //console.logで受信=firebaseに登録されている中身を確認しよう！
+      console.log(k);
+    
+      //テンプレートリテラル `` を活用して変数にhtmlを埋め込もう！ 
+      let str1 = `<p>${k.username}</p>`;
+
+    // 入力する！
+    $("#output1").prepend(str1);
+    });
+
+
+
+
+// chatの文章取得
+  const newTEXT = firebase.database().ref();
+    // startボタンをクリックされたら次の処理をする
+    $("#send").on("click", function () {
+      // データを登録で送る
+      newTEXT.push({
+        //テキストエリア
+        text:$("#text").val()
+      })
+      // 文字を空にする
+      $("#text").val(""); //空にする
+      $("#output1").detach(); //追加しない
+
+    });
+
+    // 受信処理
+    newTEXT.on("child_added", function (data2) {
+   let v = data2.val();//ここに保存されたデータが全て入ってくる
+      // function (data)のdataにfirebaseのデータが入ってくる
+
+  //  let k = data.key; //今回は使いません
+
+      //console.logで受信=firebaseに登録されている中身を確認しよう！
+      console.log(v);
+    
+   var time = new Date(); 
+   console.log(time)
+   var t = time.getHours() + ":" + time.getMinutes() 
+
+
+      //テンプレートリテラル `` を活用して変数にhtmlを埋め込もう！ 
+      let str2 = `<div class=text-all><div class=text-time>${t}</div><br><div class=text-text>${v.text}</div></div>`;
+
+    // 入力する！
+    $("#output2").append(str2);
+    });
+
+    $("#text").on("keydown", function (event) {
+    
+      // eventの中身をconsole.logでみてみよう！
+      console.log(event, "押されたよ")
+    })
+
+  
+
+
+
+  </script>
+</body>
+
+</html>
